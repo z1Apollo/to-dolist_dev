@@ -14,7 +14,7 @@ interface Task {
   title: string
   description: string
   status: "todo" | "doing" | "done"
-  priority: "low" | "medium" | "high"
+  priority: "baixa" | "média" | "alta"
   tech_stack: string[]
 }
 
@@ -24,7 +24,7 @@ export const Home = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState("medium")
+  const [priority, setPriority] = useState("média")
   const [techStack, setTechStack] = useState("")
 
   const fetchTasks = async () => {
@@ -87,7 +87,6 @@ export const Home = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
 
-      {/* CREATE CARD */}
       <Card>
         <CardHeader>
           <CardTitle>Nova Task</CardTitle>
@@ -130,7 +129,6 @@ export const Home = () => {
         </CardContent>
       </Card>
 
-      {/* TASK LIST */}
       <div className="grid gap-4">
 
         {tasks.map(task => (
@@ -197,4 +195,5 @@ export const Home = () => {
 
     </div>
   )
+
 }
