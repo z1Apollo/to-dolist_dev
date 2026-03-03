@@ -139,9 +139,9 @@ export const Home = () => {
                 <h3 className="font-semibold">{task.title}</h3>
 
                 <Badge variant={
-                  task.priority === "high"
+                  task.priority === "alta"
                     ? "destructive"
-                    : task.priority === "medium"
+                    : task.priority === "média"
                     ? "secondary"
                     : "outline"
                 }>
@@ -197,3 +197,4 @@ export const Home = () => {
   )
 
 }
+
