@@ -136,7 +136,7 @@ export const Home = () => {
             onChange={(e) => setTechStack(e.target.value)}
           />
 
-          <Button onClick={createTask} className="w-full">
+          <Button onClick={createTask} className="w-full cursor-pointer">
             Criar Task
           </Button>
         </CardContent>
@@ -184,6 +184,7 @@ export const Home = () => {
                 </Select>
 
                 <Button
+                  className="cursor-pointer"
                   size="sm"
                   variant="destructive"
                   onClick={() => deleteTask(task.id)}
@@ -198,3 +199,4 @@ export const Home = () => {
     </div>
   )
 }
+
