@@ -105,7 +105,7 @@ export const Home = () => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          <Select onValueChange={setPriority} defaultValue="medium">
+          <Select onValueChange={setPriority} defaultValue="média">
             <SelectTrigger>
               <SelectValue placeholder="Prioridade" />
             </SelectTrigger>
@@ -197,5 +197,6 @@ export const Home = () => {
   )
 
 }
+
 
 
