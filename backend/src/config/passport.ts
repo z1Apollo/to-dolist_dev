@@ -9,7 +9,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-      callbackURL: "http://localhost:3000/api/auth/github/callback"
+      callbackURL: process.env.GITHUB_CALLBACK_URL
     },
     async (accessToken: string, _refreshToken: string, profile: any, done: any) => {
       try {
@@ -91,5 +91,6 @@ passport.use(
     }
   )
 )
+
 
 export default passport
