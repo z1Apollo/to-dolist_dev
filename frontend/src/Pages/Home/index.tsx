@@ -14,7 +14,7 @@ interface Task {
   title: string
   description: string
   status: "todo" | "doing" | "done"
-  priority: "baixa" | "média" | "alta"
+  priority: "low" | "medium" | "high"
   tech_stack: string[]
 }
 
@@ -24,7 +24,7 @@ export const Home = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState("média")
+  const [priority, setPriority] = useState("medium")
   const [techStack, setTechStack] = useState("")
 
   const fetchTasks = async () => {
@@ -105,14 +105,14 @@ export const Home = () => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          <Select onValueChange={setPriority} defaultValue="média">
+          <Select onValueChange={setPriority} defaultValue="medium">
             <SelectTrigger>
               <SelectValue placeholder="Prioridade" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="baixa">Baixa</SelectItem>
-              <SelectItem value="média">Média</SelectItem>
-              <SelectItem value="alta">Alta</SelectItem>
+              <SelectItem value="low">Baixa</SelectItem>
+              <SelectItem value="medium">Média</SelectItem>
+              <SelectItem value="high">Alta</SelectItem>
             </SelectContent>
           </Select>
 
@@ -139,9 +139,9 @@ export const Home = () => {
                 <h3 className="font-semibold">{task.title}</h3>
 
                 <Badge variant={
-                  task.priority === "alta"
+                  task.priority === "high"
                     ? "destructive"
-                    : task.priority === "média"
+                    : task.priority === "medium"
                     ? "secondary"
                     : "outline"
                 }>
@@ -195,8 +195,4 @@ export const Home = () => {
 
     </div>
   )
-
 }
-
-
-
