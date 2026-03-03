@@ -110,9 +110,9 @@ export const Home = () => {
               <SelectValue placeholder="Prioridade" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="low">Baixa</SelectItem>
-              <SelectItem value="medium">Média</SelectItem>
-              <SelectItem value="high">Alta</SelectItem>
+              <SelectItem value="baixa">Baixa</SelectItem>
+              <SelectItem value="média">Média</SelectItem>
+              <SelectItem value="alta">Alta</SelectItem>
             </SelectContent>
           </Select>
 
@@ -197,4 +197,5 @@ export const Home = () => {
   )
 
 }
+
 
