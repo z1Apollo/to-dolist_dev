@@ -24,8 +24,20 @@ export const Home = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState("medium")
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [techStack, setTechStack] = useState("")
+
+  const priorityLabel: Record<Task["priority"], string> = {
+    low: "Baixa",
+    medium: "Média",
+    high: "Alta"
+  }
+
+  const priorityStyles: Record<Task["priority"], string> = {
+    low: "bg-green-500 hover:bg-green-600 text-white",
+    medium: "bg-yellow-400 hover:bg-yellow-500 text-black",
+    high: "bg-red-500 hover:bg-red-600 text-white"
+  }
 
   const fetchTasks = async () => {
     const res = await fetch(`${API_URL}/api/dev-tasks`, {
@@ -59,6 +71,7 @@ export const Home = () => {
     setTitle("")
     setDescription("")
     setTechStack("")
+    setPriority("medium")
     fetchTasks()
   }
 
@@ -86,13 +99,11 @@ export const Home = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-
       <Card>
         <CardHeader>
           <CardTitle>Nova Task</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-
           <Input
             placeholder="Título da task"
             value={title}
@@ -105,7 +116,10 @@ export const Home = () => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          <Select onValueChange={setPriority} defaultValue="medium">
+          <Select
+            value={priority}
+            onValueChange={(value: "low" | "medium" | "high") => setPriority(value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Prioridade" />
             </SelectTrigger>
@@ -125,27 +139,18 @@ export const Home = () => {
           <Button onClick={createTask} className="w-full">
             Criar Task
           </Button>
-
         </CardContent>
       </Card>
 
       <div className="grid gap-4">
-
         {tasks.map(task => (
           <Card key={task.id}>
             <CardContent className="p-4 space-y-3">
-
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold">{task.title}</h3>
 
-                <Badge variant={
-                  task.priority === "high"
-                    ? "destructive"
-                    : task.priority === "medium"
-                    ? "secondary"
-                    : "outline"
-                }>
-                  {task.priority}
+                <Badge className={priorityStyles[task.priority]}>
+                  {priorityLabel[task.priority]}
                 </Badge>
               </div>
 
@@ -162,10 +167,11 @@ export const Home = () => {
               </div>
 
               <div className="flex justify-between items-center mt-3">
-
                 <Select
-                  defaultValue={task.status}
-                  onValueChange={(value: string) => updateStatus(task, value)}
+                  value={task.status}
+                  onValueChange={(value: "todo" | "doing" | "done") =>
+                    updateStatus(task, value)
+                  }
                 >
                   <SelectTrigger className="w-37">
                     <SelectValue />
@@ -184,15 +190,11 @@ export const Home = () => {
                 >
                   Delete
                 </Button>
-
               </div>
-
             </CardContent>
           </Card>
         ))}
-
       </div>
-
     </div>
   )
 }
