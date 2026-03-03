@@ -3,6 +3,18 @@ import { Strategy as GitHubStrategy } from "passport-github2"
 import jwt from "jsonwebtoken"
 import { pool } from "../database/db"
 import axios from "axios"
+import dotenv from "dotenv";
+
+dotenv.config();
+
+if (
+  !process.env.GITHUB_CLIENT_ID ||
+  !process.env.GITHUB_CLIENT_SECRET ||
+  !process.env.GITHUB_CALLBACK_URL ||
+  !process.env.JWT_SECRET
+) {
+  throw new Error("Variáveis de ambiente obrigatórias não definidas.");
+}
 
 passport.use(
   new GitHubStrategy(
@@ -94,3 +106,4 @@ passport.use(
 
 
 export default passport
+
