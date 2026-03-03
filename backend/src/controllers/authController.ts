@@ -36,8 +36,7 @@ export const register = async (req: Request, res: Response) => {
     );
 
     return res.status(201).json(newUser.rows[0]);
-
-  } catch (error) {
+  } catch {
     return res.status(500).json({ message: "Erro no servidor" });
   }
 };
@@ -65,7 +64,6 @@ export const login = async (req: Request, res: Response) => {
 
     const user = result.rows[0];
 
-    // 🚫 Impede login local se conta for OAuth
     if (user.provider !== "local") {
       return res.status(400).json({
         message: `Use login com ${user.provider} para essa conta`
@@ -82,9 +80,13 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Credenciais inválidas" });
     }
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET não definido");
+    }
+
     const token = jwt.sign(
       { id: user.id },
-      process.env.JWT_SECRET as string,
+      process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
@@ -97,18 +99,29 @@ export const login = async (req: Request, res: Response) => {
         avatarUrl: user.avatar_url
       }
     });
-
-  } catch (error) {
+  } catch {
     return res.status(500).json({ message: "Erro no servidor" });
   }
 };
 
 export const githubCallback = (req: any, res: Response) => {
-  const { token, user } = req.user;
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Usuário não autenticado" });
+    }
 
-  const encodedUser = encodeURIComponent(JSON.stringify(user));
+    const { token, user } = req.user;
 
-  res.redirect(
-    `http://localhost:5173/oauth-success?token=${token}&user=${encodedUser}`
-  );
+    if (!process.env.FRONTEND_URL) {
+      throw new Error("FRONTEND_URL não definido");
+    }
+
+    const encodedUser = encodeURIComponent(JSON.stringify(user));
+
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/oauth-success?token=${token}&user=${encodedUser}`
+    );
+  } catch {
+    return res.status(500).json({ message: "Erro no login com GitHub" });
+  }
 };
