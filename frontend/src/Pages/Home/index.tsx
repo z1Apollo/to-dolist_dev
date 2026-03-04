@@ -26,6 +26,8 @@ export const Home = () => {
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [techStack, setTechStack] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [, setError] = useState<string | null>(null)
 
   const priorityLabel: Record<Task["priority"], string> = {
     low: "Baixa",
@@ -54,25 +56,33 @@ export const Home = () => {
   const createTask = async () => {
     if (!title) return
 
-    await fetch(`${API_URL}/api/dev-tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        priority,
-        tech_stack: techStack.split(",").map(t => t.trim())
-      })
-    })
+    try {
+        setLoading(true)
 
-    setTitle("")
-    setDescription("")
-    setTechStack("")
-    setPriority("medium")
-    fetchTasks()
+        await fetch(`${API_URL}/api/dev-tasks`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title,
+            description,
+            priority,
+            tech_stack: techStack.split(",").map(t => t.trim())
+          })
+        })
+
+        setTitle("")
+        setDescription("")
+        setTechStack("")
+        setPriority("medium")
+        fetchTasks()
+    } catch {
+      setError("Erro ao criar task")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const updateStatus = async (task: Task, status: string) => {
@@ -136,9 +146,9 @@ export const Home = () => {
             onChange={(e) => setTechStack(e.target.value)}
           />
 
-          <Button onClick={createTask} className="w-full cursor-pointer">
-            Criar Task
-          </Button>
+          <Button onClick={createTask} className="w-full cursor-pointer" disabled={loading}>
+            {loading ? "Criando task..." : "Criar task"}
+          </Button> 
         </CardContent>
       </Card>
 
