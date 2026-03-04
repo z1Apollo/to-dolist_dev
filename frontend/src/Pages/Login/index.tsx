@@ -1,212 +1,142 @@
-import { useEffect, useState } from "react"
-import { useAuth } from "@/context/AuthContext"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { FaGithub } from "react-icons/fa"
+import { useNavigate } from "react-router-dom"
+import { Field, FieldGroup } from "@/components/ui/field"
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import { REGEXP_ONLY_DIGITS } from "input-otp"
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const API_URL = import.meta.env.VITE_API_URL
+export const Login = () => {
+    const navigate = useNavigate()
+    const { login } = useAuth();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
 
-interface Task {
-  id: string
-  title: string
-  description: string
-  status: "todo" | "doing" | "done"
-  priority: "low" | "medium" | "high"
-  tech_stack: string[]
+    return (
+        <>
+            <div className="h-screen flex justify-center w-full">
+                <section className="flex items-center justify-center bg-background h-full max-w-3xl w-full p-4">
+                    <Card className="w-full max-w-md ">
+                        <CardHeader>
+                            <CardTitle className="text-2xl font-bold tracking-tighter">
+                                Entre com a sua conta
+                            </CardTitle>
+                            <CardDescription>
+                                Utilize seu email e senha ou GitHub para entrar.
+                            </CardDescription>
+                            <CardAction>
+                                <Button className="text-muted-foreground hover:text-primary hover:cursor-pointer" onClick={() => {navigate("/cadastro")}} variant={"link"}>Cadastro</Button>
+                            </CardAction>
+                        </CardHeader>
+                        <CardContent>
+                            <form className="flex flex-col gap-2"
+                            onSubmit={async (e) => {
+                                e.preventDefault()
+                                setError(null)
+                                setLoading(true)
+
+                                try {
+                                    const response = await fetch(`${API_URL}/api/auth/login`, {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json"
+                                        },
+                                        body: JSON.stringify({ email, password })
+                                    })
+
+                                    const data = await response.json()
+
+                                    if (!response.ok) {
+                                        setError(data.message || "Email ou senha inválidos")
+                                        return
+                                    }
+
+                                    login(data.token, data.user)
+                                    navigate("/")
+
+                                } catch {
+                                    setError("Erro ao conectar com servidor")
+                                } finally {
+                                    setLoading(false)
+                                }
+                            }}
+                            >
+                                <div className="grid gap-2">
+                                    <Label htmlFor="email">Email</Label> 
+                                    <Input type="email" id="email" placeholder="example@email.com"  className={error ? "border-red-500 focus-visible:ring-red-500" : ""} value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                </div>
+                                <div className="grid">
+                                    <div className="flex items-center"> 
+                                        <Label htmlFor="password">Senha</Label>
+                                        
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button variant={"link"} className="ml-auto inline-block text-sm text-muted-foreground underline-offset-4 hover:underline hover:cursor-pointer hover:text-primary">Esqueceu a senha?</Button>   
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Enviaremos um código de segurança para o seu email.</DialogTitle>
+                                                    <DialogDescription>Verifique se o email que você está usando é o cadastrado no nosso projeto.</DialogDescription>
+                                                </DialogHeader>
+                                                <FieldGroup>
+                                                    <Field className="flex">
+                                                        <Input type="email" id="email-cod" placeholder="confirme seu email." required/>
+                                                    </Field>
+                                                    <Field>
+                                                        <div className="flex justify-center items-center gap-10">
+                                                            <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS}>
+                                                                <InputOTPGroup>
+                                                                    <InputOTPSlot index={0} />
+                                                                    <InputOTPSlot index={1} />
+                                                                    <InputOTPSlot index={2} />
+                                                                    <InputOTPSlot index={3} />
+                                                                    <InputOTPSlot index={4} />
+                                                                    <InputOTPSlot index={5} />
+                                                                </InputOTPGroup>
+                                                            </InputOTP>
+                                                            <Button>Enviar código</Button>
+                                                        </div>
+                                                    </Field>
+                                                </FieldGroup>
+                                                <DialogFooter>
+                                                    <Button className="w-full mt-2">Confirmar</Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </div>
+                                    <Input type="password" id="password" placeholder="sua senha secreta"  className={error ? "border-red-500 focus-visible:ring-red-500" : ""} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                </div>
+                                {error && (
+                                    <div className="bg-red-500/10 border border-red-500 text-red-500 text-sm p-3 rounded-md">
+                                        {error}
+                                    </div>
+                                )}
+                            <Button className="mt-6 w-full hover:cursor-pointer" type="submit" disabled={loading}>
+                                {loading ? "Entrando..." : "Entrar"}
+                            </Button>
+                            </form>  
+                            <div className="flex items-center gap-4 mt-4">
+                                <Separator />
+                                    <span className="text-xs text-muted-foreground">ou</span>
+                                <Separator />
+                            </div>
+                            <Button type="button" variant={"outline"} className="mt-4 w-full hover:cursor-pointer" onClick={() => {window.location.href = `${API_URL}/api/auth/github`}}> <FaGithub className="mr-2" /> Entrar com o GitHub</Button>
+                        </CardContent>
+                        <CardFooter>
+                            <p className="text-muted-foreground text-center text-sm">Ao entrar em nossa plataforma, você concorda com nossos Termos de Uso e Política de Privacidade.</p>
+                        </CardFooter>
+                    </Card>
+                </section>
+            </div>
+        </>
+    )
 }
-
-export const Home = () => {
-  const { token } = useAuth()
-
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
-  const [techStack, setTechStack] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [, setError] = useState<string | null>(null)
-
-  const priorityLabel: Record<Task["priority"], string> = {
-    low: "Baixa",
-    medium: "Média",
-    high: "Alta"
-  }
-
-  const priorityStyles: Record<Task["priority"], string> = {
-    low: "bg-green-500 hover:bg-green-600 text-white",
-    medium: "bg-yellow-400 hover:bg-yellow-500 text-black",
-    high: "bg-red-500 hover:bg-red-600 text-white"
-  }
-
-  const fetchTasks = async () => {
-    const res = await fetch(`${API_URL}/api/dev-tasks`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    const data = await res.json()
-    setTasks(data)
-  }
-
-  useEffect(() => {
-    fetchTasks()
-  }, [])
-
-  const createTask = async () => {
-    if (!title) return
-
-    try {
-        setLoading(true)
-
-        await fetch(`${API_URL}/api/dev-tasks`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            title,
-            description,
-            priority,
-            tech_stack: techStack.split(",").map(t => t.trim())
-          })
-        })
-
-        setTitle("")
-        setDescription("")
-        setTechStack("")
-        setPriority("medium")
-        fetchTasks()
-    } catch {
-      setError("Erro ao criar task")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updateStatus = async (task: Task, status: string) => {
-    await fetch(`${API_URL}/api/dev-tasks/${task.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ ...task, status })
-    })
-
-    fetchTasks()
-  }
-
-  const deleteTask = async (id: string) => {
-    await fetch(`${API_URL}/api/dev-tasks/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
-    })
-
-    fetchTasks()
-  }
-
-  return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Nova Task</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            placeholder="Título da task"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <Textarea
-            placeholder="Descrição"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          <Select
-            value={priority}
-            onValueChange={(value: "low" | "medium" | "high") => setPriority(value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Prioridade" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Baixa</SelectItem>
-              <SelectItem value="medium">Média</SelectItem>
-              <SelectItem value="high">Alta</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Input
-            placeholder="Tecnologia usada (React, Node, Python)"
-            value={techStack}
-            onChange={(e) => setTechStack(e.target.value)}
-          />
-
-          <Button onClick={createTask} className="w-full cursor-pointer" disabled={loading}>
-            {loading ? "Criando task..." : "Criar task"}
-          </Button> 
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4">
-        {tasks.map(task => (
-          <Card key={task.id}>
-            <CardContent className="p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <h3 className="font-semibold">{task.title}</h3>
-
-                <Badge className={priorityStyles[task.priority]}>
-                  {priorityLabel[task.priority]}
-                </Badge>
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                {task.description}
-              </p>
-
-              <div className="flex gap-2 flex-wrap">
-                {task.tech_stack?.map((tech, i) => (
-                  <Badge key={i} variant="outline">
-                    {tech}
-                  </Badge>
-                ))}
-              </div>
-
-              <div className="flex justify-between items-center mt-3">
-                <Select
-                  value={task.status}
-                  onValueChange={(value: "todo" | "doing" | "done") =>
-                    updateStatus(task, value)
-                  }
-                >
-                  <SelectTrigger className="w-37">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todo">Pendente</SelectItem>
-                    <SelectItem value="doing">Em andamento</SelectItem>
-                    <SelectItem value="done">Concluído</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  className="cursor-pointer"
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => deleteTask(task.id)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  )
-}
-
